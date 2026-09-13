@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+.fe {
+  font-family: 'Fluent Emoji Color', serif;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  touch-action: manipulation;
+}

@@ -1,0 +1,19 @@
+{
+  "name": "openlp-simple-remote",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A really simple remote web controller for OpenLP",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js",
+    "build:css": "tailwindcss -i static/input.css -o static/app.css --minify"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.0"
+  }
+}

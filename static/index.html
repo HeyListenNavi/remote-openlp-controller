@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#020617" />
+    <title>OpenLP Remote</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/tetunori/fluent-emoji-webfont@v0.8.5/dist/FluentEmojiColor.css"
+    />
+    <link rel="stylesheet" href="app.css" />
+  </head>
+  <body class="h-full overflow-hidden bg-slate-950 text-slate-100 antialiased select-none">
+    <div class="mx-auto flex h-full max-w-xl flex-col">
+      <header class="flex items-center gap-3 border-b border-slate-800 px-4 py-3">
+        <span id="hdr-icon" class="fe w-10 shrink-0 text-center text-3xl leading-none">📄</span>
+        <div class="min-w-0 flex-1">
+          <p id="hdr-title" class="truncate text-lg font-semibold leading-tight">&#8212;</p>
+          <p id="hdr-sub" class="mt-0.5 truncate text-sm leading-tight text-slate-400">not connected</p>
+        </div>
+        <span id="status-dot" class="h-3 w-3 shrink-0 rounded-full bg-slate-600"></span>
+      </header>
+
+      <main id="item-list" class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2"></main>
+
+      <footer class="grid grid-cols-2 gap-3 border-t border-slate-800 px-4 py-3">
+        <button
+          id="btn-prev"
+          type="button"
+          aria-label="Previous"
+          class="h-16 rounded-2xl bg-slate-800 text-4xl font-bold text-white transition active:scale-95 active:bg-slate-700 disabled:pointer-events-none disabled:opacity-30"
+        >
+          &#8249;
+        </button>
+        <button
+          id="btn-next"
+          type="button"
+          aria-label="Next"
+          class="h-16 rounded-2xl bg-indigo-600 text-4xl font-bold text-white transition active:scale-95 active:bg-indigo-500 disabled:pointer-events-none disabled:opacity-30"
+        >
+          &#8250;
+        </button>
+      </footer>
+    </div>
+
+    <div
+      id="login-overlay"
+      class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4"
+    >
+      <form id="login-form" class="w-full max-w-xs rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <h2 class="text-lg font-semibold">Enter PIN</h2>
+        <p class="mt-1 text-sm text-slate-400">This remote is password-protected.</p>
+        <input
+          id="login-pin"
+          type="password"
+          inputmode="numeric"
+          autocomplete="current-password"
+          class="mt-4 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-lg"
+          placeholder="PIN"
+        />
+        <p id="login-error" class="mt-2 hidden text-sm text-red-400">Wrong PIN</p>
+        <button type="submit" class="mt-4 w-full rounded-xl bg-indigo-600 py-2 font-semibold">
+          Unlock
+        </button>
+      </form>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
