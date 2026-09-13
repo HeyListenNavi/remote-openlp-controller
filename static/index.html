@@ -1,13 +1,21 @@
 <!doctype html>
-<html lang="en" class="h-full">
+<html lang="es" class="h-full">
   <head>
     <meta charset="utf-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#020617" />
-    <title>OpenLP Remote</title>
+    <meta name="theme-color" content="#f8fafc" />
+    <title>Iglesia de Dios Granjas</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/church.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link
       rel="stylesheet"
@@ -15,57 +23,83 @@
     />
     <link rel="stylesheet" href="app.css" />
   </head>
-  <body class="h-full overflow-hidden bg-slate-950 text-slate-100 antialiased select-none">
-    <div class="mx-auto flex h-full max-w-xl flex-col">
-      <header class="flex items-center gap-3 border-b border-slate-800 px-4 py-3">
-        <span id="hdr-icon" class="fe w-10 shrink-0 text-center text-3xl leading-none">📄</span>
-        <div class="min-w-0 flex-1">
-          <p id="hdr-title" class="truncate text-lg font-semibold leading-tight">&#8212;</p>
-          <p id="hdr-sub" class="mt-0.5 truncate text-sm leading-tight text-slate-400">not connected</p>
-        </div>
-        <span id="status-dot" class="h-3 w-3 shrink-0 rounded-full bg-slate-600"></span>
-      </header>
+  <body class="h-full overflow-hidden bg-slate-50 text-slate-800 antialiased select-none px-2s">
+    <div id="status-dot" class="fixed right-5 top-5 h-2.5 w-2.5 rounded-full bg-slate-300 z-10"></div>
 
-      <main id="item-list" class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2"></main>
+    <div class="mx-auto flex h-full max-w-md flex-col items-center">
+      <!-- Headline -->
+      <div class="pt-18 pb-6 text-center">
+        <span class="fe text-[6rem] leading-none">⛪</span>
+        <h1 class="mt-3 text-3xl font-extrabold tracking-tight text-slate-800">
+          Iglesia de Dios Granjas
+        </h1>
+      </div>
 
-      <footer class="grid grid-cols-2 gap-3 border-t border-slate-800 px-4 py-3">
+      <!-- Buttons -->
+      <div class="flex w-full items-center justify-center gap-4 px-6">
         <button
           id="btn-prev"
           type="button"
-          aria-label="Previous"
-          class="h-16 rounded-2xl bg-slate-800 text-4xl font-bold text-white transition active:scale-95 active:bg-slate-700 disabled:pointer-events-none disabled:opacity-30"
+          aria-label="Anterior"
+          class="flex h-14 w-14 items-center justify-center rounded-full border border-slate-200 bg-white text-3xl font-bold text-slate-400 shadow-sm transition active:scale-95 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-25"
         >
           &#8249;
         </button>
         <button
           id="btn-next"
           type="button"
-          aria-label="Next"
-          class="h-16 rounded-2xl bg-indigo-600 text-4xl font-bold text-white transition active:scale-95 active:bg-indigo-500 disabled:pointer-events-none disabled:opacity-30"
+          aria-label="Siguiente"
+          class="flex h-16 flex-1 items-center justify-center gap-2 rounded-2xl bg-indigo-600 text-2xl font-bold text-white shadow-md transition active:scale-[0.98] active:bg-indigo-500 disabled:pointer-events-none disabled:opacity-25"
         >
-          &#8250;
+          Siguiente&nbsp;&#8250;
         </button>
-      </footer>
+      </div>
+
+      <!-- Live status -->
+      <p
+        id="live-info"
+        class="live-info pt-5 pb-1 text-center text-sm font-medium text-slate-400 min-h-[1.5rem] px-6"
+      ></p>
+
+      <!-- Verse chips (bibles only) -->
+      <div
+        id="verse-chips"
+        class="no-scrollbar chips-hidden w-full flex gap-4 overflow-x-auto px-6 pb-4 pt-1"
+      ></div>
+
+      <!-- List -->
+      <div
+        id="item-list"
+        class="min-h-0 w-full flex-1 overflow-y-auto overscroll-contain px-5 pb-8"
+      ></div>
     </div>
 
     <div
       id="login-overlay"
-      class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4"
+      class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 p-4 backdrop-blur"
     >
-      <form id="login-form" class="w-full max-w-xs rounded-2xl border border-slate-800 bg-slate-900 p-6">
-        <h2 class="text-lg font-semibold">Enter PIN</h2>
-        <p class="mt-1 text-sm text-slate-400">This remote is password-protected.</p>
+      <form
+        id="login-form"
+        class="w-full max-w-xs rounded-3xl border border-slate-200 bg-white p-7 shadow-2xl"
+      >
+        <p class="text-base font-bold text-slate-800">PIN requerido</p>
+        <p class="mt-1 text-sm text-slate-400">Ingresa el PIN para acceder.</p>
         <input
           id="login-pin"
           type="password"
           inputmode="numeric"
           autocomplete="current-password"
-          class="mt-4 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-lg"
-          placeholder="PIN"
+          class="mt-4 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-lg tracking-wider text-slate-900 placeholder-slate-300 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          placeholder="····"
         />
-        <p id="login-error" class="mt-2 hidden text-sm text-red-400">Wrong PIN</p>
-        <button type="submit" class="mt-4 w-full rounded-xl bg-indigo-600 py-2 font-semibold">
-          Unlock
+        <p id="login-error" class="mt-2 hidden text-sm font-semibold text-red-500">
+          PIN incorrecto
+        </p>
+        <button
+          type="submit"
+          class="mt-5 w-full rounded-xl bg-indigo-600 py-2.5 text-sm font-bold text-white transition active:scale-[0.98] active:bg-indigo-500"
+        >
+          Desbloquear
         </button>
       </form>
     </div>

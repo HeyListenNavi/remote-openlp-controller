@@ -13,23 +13,10 @@
     notes: '📋',
   };
 
-  const LABELS = {
-    images: 'Image',
-    bibles: 'Bible',
-    media: 'Video',
-    songs: 'Song',
-    presentations: 'Slides',
-    custom: 'Slide',
-    alerts: 'Alert',
-    audio: 'Audio',
-    notes: 'Note',
-  };
-
   const $ = (id) => document.getElementById(id);
   const listEl = $('item-list');
-  const hdrIcon = $('hdr-icon');
-  const hdrTitle = $('hdr-title');
-  const hdrSub = $('hdr-sub');
+  const chipsEl = $('verse-chips');
+  const liveInfo = $('live-info');
   const dot = $('status-dot');
   const btnPrev = $('btn-prev');
   const btnNext = $('btn-next');
@@ -43,19 +30,19 @@
   let live = null;
   let connection = 'ok';
   let pollTimer = null;
+  let chipsVisible = false;
 
   const iconFor = (plugin) => ICONS[plugin] || '📄';
-  const labelFor = (plugin) => LABELS[plugin] || (plugin || '');
 
   function showLogin() {
     overlay.classList.remove('hidden');
     overlay.classList.add('flex');
-    loginPin.focus();
+    setTimeout(() => loginPin.focus(), 50);
   }
 
   function hideLogin() {
-    overlay.classList.remove('flex');
     overlay.classList.add('hidden');
+    setTimeout(() => overlay.classList.remove('flex'), 300);
   }
 
   async function api(path, opts) {
@@ -124,73 +111,119 @@
     return liveItemIndex() > 0;
   }
 
+  function shouldShowChips() {
+    return live && live.name === 'bibles' && Array.isArray(live.slides) && live.slides.length >= 2;
+  }
+
+  function renderChips() {
+    const wantVisible = shouldShowChips();
+
+    if (!wantVisible) {
+      if (chipsVisible) {
+        chipsEl.classList.remove('chips-visible');
+        chipsEl.classList.add('chips-hidden');
+        chipsVisible = false;
+      }
+      return;
+    }
+
+    chipsEl.innerHTML = '';
+    const sIdx = slideIndex();
+    live.slides.forEach((slide, idx) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.textContent = slide.tag || `${idx + 1}`;
+      chip.className =
+        'shrink-0 rounded-full px-5 py-3 text-sm font-semibold min-h-[48px] min-w-[60px] ' +
+        (idx === sIdx
+          ? 'bg-indigo-600 text-white shadow-sm'
+          : 'bg-slate-200 text-slate-600');
+      chip.addEventListener('click', () => goSlide(idx));
+      chipsEl.appendChild(chip);
+    });
+
+    if (!chipsVisible) {
+      chipsEl.classList.remove('chips-hidden');
+      chipsEl.classList.add('chips-visible');
+      chipsVisible = true;
+    }
+  }
+
+  function setTextSmooth(el, text) {
+    if (el.textContent === text) return;
+    el.classList.add('fading');
+    setTimeout(() => {
+      el.textContent = text;
+      el.classList.remove('fading');
+    }, 200);
+  }
+
   function render() {
     const sIdx = slideIndex();
     const lIdx = liveItemIndex();
-    const plugin = live ? pluginOf(live.id) || live.plugin || '' : '';
 
-    hdrIcon.textContent = iconFor(plugin);
-    hdrTitle.textContent = live ? live.title : 'Nothing live';
-
-    if (live && live.slides && live.slides.length && sIdx >= 0) {
-      const total = live.slides.length;
+    let infoText = '';
+    if (live) {
+      const tag = sIdx >= 0 && live.slides[sIdx] && live.slides[sIdx].tag ? live.slides[sIdx].tag : '';
+      const total = live.slides ? live.slides.length : 0;
       const pos = total > 1 ? `${sIdx + 1}/${total}` : '';
-      const tag = live.slides[sIdx].tag || '';
-      hdrSub.textContent = [labelFor(plugin), tag, pos].filter(Boolean).join(' · ');
+      infoText = [live.title, tag, pos].filter(Boolean).join(' · ');
     } else if (connection === 'ok') {
-      hdrSub.textContent = 'Ready';
+      infoText = 'Nada en vivo';
     } else if (connection === 'down') {
-      hdrSub.textContent = 'OpenLP unreachable';
-    } else if (connection === 'openpauth') {
-      hdrSub.textContent = 'OpenLP login failed';
-    } else {
-      hdrSub.textContent = 'PIN required';
+      infoText = 'Sin conexión';
     }
 
+    setTextSmooth(liveInfo, infoText);
+
     dot.className =
-      'h-3 w-3 shrink-0 rounded-full ' +
+      'fixed right-5 top-5 h-2.5 w-2.5 rounded-full z-10 transition-colors duration-300 ' +
       (connection === 'ok'
-        ? 'bg-emerald-500'
+        ? 'bg-emerald-400'
         : connection === 'down'
-          ? 'bg-red-500'
+          ? 'bg-red-400'
           : 'bg-amber-400');
+
+    renderChips();
 
     listEl.innerHTML = '';
     items.forEach((it, idx) => {
-      const active = lIdx === idx || (live && it.id === live.id);
+      const active = live && it.id === live.id;
       const row = document.createElement('button');
       row.type = 'button';
       row.className =
-        'flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition active:bg-slate-800 ' +
-        (active ? 'bg-indigo-500/20 ring-1 ring-indigo-400/40' : 'hover:bg-slate-800/60');
+        'flex w-full items-center gap-4 rounded-2xl px-4 py-4 text-left transition-all duration-200 ease-out ' +
+        (active ? 'bg-indigo-50' : 'bg-transparent active:bg-slate-100');
 
       const ic = document.createElement('span');
-      ic.className = 'fe w-8 shrink-0 text-center text-2xl leading-none';
+      ic.className = 'fe shrink-0 text-center text-[1.6rem] leading-none';
       ic.textContent = iconFor(it.plugin);
 
       const t = document.createElement('span');
       t.className =
-        'min-w-0 flex-1 truncate text-sm font-medium ' + (active ? 'text-white' : 'text-slate-300');
+        'min-w-0 flex-1 truncate text-[15px] font-medium transition-colors duration-200 ' +
+        (active ? 'text-indigo-700' : 'text-slate-700');
       t.textContent = it.title;
 
-      const lb = document.createElement('span');
-      lb.className = 'shrink-0 text-[10px] uppercase tracking-wide text-slate-500';
-      lb.textContent = labelFor(it.plugin);
+      if (active) {
+        const check = document.createElement('span');
+        check.className = 'shrink-0 text-indigo-500 text-sm font-medium';
+        check.textContent = 'En vivo';
+        row.append(ic, t, check);
+      } else {
+        row.append(ic, t);
+      }
 
-      row.append(ic, t, lb);
       row.addEventListener('click', () => goShow(it.id));
       listEl.appendChild(row);
 
-      if (active) setTimeout(() => row.scrollIntoView({ block: 'nearest' }), 0);
+      if (active && idx !== lIdx) {
+        setTimeout(() => row.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 0);
+      }
     });
 
     btnNext.disabled = !canNext();
     btnPrev.disabled = !canPrev();
-  }
-
-  function pluginOf(id) {
-    const it = items.find((i) => i.id === id);
-    return it ? it.plugin : '';
   }
 
   async function refresh() {
@@ -203,6 +236,11 @@
 
   async function goShow(id) {
     await post('/service/show', { id });
+    refresh();
+  }
+
+  async function goSlide(idx) {
+    await post('/controller/show', { id: idx });
     refresh();
   }
 
